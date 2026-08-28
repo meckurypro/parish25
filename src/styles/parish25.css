@@ -1,0 +1,83 @@
+/* src/styles/parish25.css — shared design tokens + layout for all Parish 25 pages */
+/* Import once, e.g. in Parish25Home.jsx / Parish25Request.jsx / Parish25Admin.jsx */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root {
+  --bg-0: #faf9f6;
+  --bg-1: #f1eee7;
+  --bg-2: #e9e4d9;
+  --ink: #211f1d;
+  --ink-soft: #5b564e;
+  --accent: #e2571f;
+  --done: #4b7355;
+  --warn: #c8922f;   /* used sparingly: 'contacted' state, admin-only */
+  --line: rgba(33, 31, 29, 0.1);
+  --glass: rgba(255, 255, 255, 0.55);
+  --display: 'Fraunces', serif;
+  --body: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+.p25 { background: var(--bg-0); color: var(--ink); font-family: var(--body); line-height: 1.5; min-height: 100vh; }
+
+.p25 a { color: inherit; }
+.p25 img, .p25 svg { display: block; max-width: 100%; }
+
+.p25-wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+@media (min-width: 720px) { .p25-wrap { padding: 3rem 2rem 5rem; } }
+
+.p25-nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.25rem 0; max-width: 640px; margin: 0 auto; }
+.p25-wordmark { font-family: var(--display); font-weight: 600; font-size: 1.05rem; text-decoration: none; }
+.p25-wordmark span { color: var(--accent); }
+.p25-nav a.p25-navlink { font-size: 0.9rem; text-decoration: none; color: var(--ink-soft); border: 1px solid var(--line); padding: 0.5rem 1rem; border-radius: 100px; }
+
+.p25-eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.p25-title { font-family: var(--display); font-weight: 500; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.08; margin: 0.6rem 0 1rem; }
+.p25-title em { font-style: italic; color: var(--accent); }
+.p25-lede { font-size: 1.05rem; color: var(--ink-soft); max-width: 46ch; margin: 0 0 2rem; }
+
+.p25-card { background: var(--glass); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border: 1px solid var(--line); border-radius: 20px; padding: 1.5rem; }
+
+.p25-chain-section { margin: 2.5rem 0; }
+.p25-chain-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+.p25-chain-count { font-family: var(--mono); font-size: 0.95rem; color: var(--ink-soft); }
+.p25-chain-count b { color: var(--ink); font-weight: 500; }
+.p25-chain { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
+.p25-bead { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--bg-2); background: var(--bg-1); flex: 0 0 auto; position: relative; }
+.p25-bead.done { background: var(--done); border-color: var(--done); }
+.p25-bead.done::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 3px rgba(75, 115, 85, 0.15); }
+.p25-chain-note { margin-top: 1rem; font-size: 0.85rem; color: var(--ink-soft); }
+
+.p25-list { list-style: none; margin: 1.25rem 0 0; padding: 0; }
+.p25-list li { display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 0; border-top: 1px solid var(--line); font-size: 0.98rem; }
+.p25-list li:first-child { border-top: none; }
+.p25-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done); flex: 0 0 auto; }
+.p25-dot.warn { background: var(--warn); }
+.p25-name { font-weight: 500; }
+
+.p25-h2 { font-family: var(--display); font-weight: 500; font-size: 1.4rem; margin: 0 0 0.75rem; }
+
+.p25-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--accent); color: #fff; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.85rem 1.5rem; border-radius: 100px; border: none; cursor: pointer; width: 100%; }
+@media (min-width: 480px) { .p25-btn { width: auto; } }
+.p25-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.p25-field { margin-bottom: 1.1rem; }
+.p25-field label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; }
+.p25-field input, .p25-field textarea, .p25-field select { width: 100%; font-family: var(--body); font-size: 1rem; padding: 0.75rem 0.9rem; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-0); color: var(--ink); }
+.p25-field textarea { resize: vertical; min-height: 90px; }
+
+.p25-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--ink-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.p25-footer a { text-decoration: underline; }
+
+/* -- admin-only additions -- */
+.p25-admin-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-top: 1px solid var(--line); }
+.p25-admin-row:first-child { border-top: none; }
+.p25-status-badge { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem 0.6rem; border-radius: 100px; }
+.p25-status-badge.enquiry { background: var(--bg-2); color: var(--ink-soft); }
+.p25-status-badge.contacted { background: rgba(200, 146, 47, 0.15); color: var(--warn); }
+.p25-status-badge.confirmed { background: rgba(226, 87, 31, 0.12); color: var(--accent); }
+.p25-status-badge.executed { background: rgba(75, 115, 85, 0.15); color: var(--done); }
+
