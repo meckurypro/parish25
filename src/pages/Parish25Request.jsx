@@ -48,14 +48,14 @@ export default function Parish25Request() {
     return (
       <div className="p25">
         <div className="p25-nav">
-          <a className="p25-wordmark" href="/parish25">Parish 25<span>.</span></a>
+          <a className="p25-wordmark" href="/">Parish 25<span>.</span></a>
         </div>
         <main className="p25-wrap">
           <section>
             <p className="p25-eyebrow">Request sent</p>
             <h1 className="p25-title">Thank you.</h1>
             <p className="p25-lede">We've received your request and will follow up directly.</p>
-            <a className="p25-btn" href="/parish25">Back to progress</a>
+            <a className="p25-btn" href="/">Back to progress</a>
           </section>
         </main>
       </div>
@@ -65,8 +65,8 @@ export default function Parish25Request() {
   return (
     <div className="p25">
       <div className="p25-nav">
-        <a className="p25-wordmark" href="/parish25">Parish 25<span>.</span></a>
-        <nav><a className="p25-navlink" href="/parish25">See progress</a></nav>
+        <a className="p25-wordmark" href="/">Parish 25<span>.</span></a>
+        <nav><a className="p25-navlink" href="/">See progress</a></nav>
       </div>
 
       <main className="p25-wrap">
@@ -130,10 +130,9 @@ export default function Parish25Request() {
 
         <footer className="p25-footer">
           <span>Parish 25 Initiative — a PromptIQ movement</span>
-          <a href="/parish25">Back to progress →</a>
+          <a href="/">Back to progress →</a>
         </footer>
       </main>
     </div>
   );
 }
-
