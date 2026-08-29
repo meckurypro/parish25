@@ -45,8 +45,8 @@ export default function Parish25Home() {
   return (
     <div className="p25">
       <div className="p25-nav">
-        <a className="p25-wordmark" href="/parish25">Parish 25<span>.</span></a>
-        <nav><a className="p25-navlink" href="/parish25/request">Request a visit</a></nav>
+        <a className="p25-wordmark" href="/">Parish 25<span>.</span></a>
+        <nav><a className="p25-navlink" href="/request">Request a visit</a></nav>
       </div>
 
       <main className="p25-wrap">
@@ -101,7 +101,7 @@ export default function Parish25Home() {
           <p className="p25-lede" style={{ marginBottom: '1.25rem' }}>
             Tell us about your parish and we'll follow up to arrange a visit.
           </p>
-          <a className="p25-btn" href="/parish25/request">Request a visit</a>
+          <a className="p25-btn" href="/request">Request a visit</a>
         </section>
 
         <footer className="p25-footer">
@@ -112,4 +112,3 @@ export default function Parish25Home() {
     </div>
   );
 }
-
