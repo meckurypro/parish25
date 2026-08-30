@@ -2,7 +2,7 @@
 // Public landing page for the Parish 25 Initiative.
 // Route this at e.g. /parish25 in your router.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import '../styles/parish25.css';
 
@@ -12,8 +12,6 @@ export default function Parish25Home() {
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(true);
   const [skills, setSkills] = useState([]);
-  const trackRef = useRef(null);
-  const pausedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -54,32 +52,6 @@ export default function Parish25Home() {
     return () => { active = false; };
   }, []);
 
-  // Gentle continuous auto-scroll on the skills strip — pauses while the
-  // user is actively touching/dragging it, resumes shortly after they let go.
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || skills.length === 0) return;
-
-    const id = setInterval(() => {
-      if (pausedRef.current) return;
-      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
-      if (atEnd) {
-        track.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        track.scrollBy({ left: 1, behavior: 'auto' });
-      }
-    }, 30);
-
-    return () => clearInterval(id);
-  }, [skills]);
-
-  function pause() {
-    pausedRef.current = true;
-  }
-  function resumeSoon() {
-    setTimeout(() => { pausedRef.current = false; }, 2500);
-  }
-
   const doneCount = completed.length;
   const beads = Array.from({ length: TOTAL_SLOTS }, (_, i) => i < doneCount);
 
@@ -100,28 +72,6 @@ export default function Parish25Home() {
             is a parish. Filled means the work there is done.
           </p>
         </section>
-
-        {skills.length > 0 && (
-          <section style={{ margin: '2.5rem 0' }}>
-            <h2 className="p25-h2">What you'll learn</h2>
-            <div
-              className="p25-skills-track"
-              ref={trackRef}
-              onTouchStart={pause}
-              onTouchEnd={resumeSoon}
-              onMouseDown={pause}
-              onMouseUp={resumeSoon}
-            >
-              {skills.map((s, i) => (
-                <div className="p25-skill-card" key={s.id}>
-                  <div className="p25-skill-index">{String(i + 1).padStart(2, '0')}</div>
-                  <div className="p25-skill-title">{s.title}</div>
-                  <p className="p25-skill-desc">{s.description}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
         <section className="p25-chain-section">
           <div className="p25-chain-header">
@@ -157,6 +107,24 @@ export default function Parish25Home() {
             ))}
           </ul>
         </section>
+
+        {skills.length > 0 && (
+          <section style={{ margin: '2.5rem 0' }}>
+            <h2 className="p25-h2">Modules</h2>
+            <p className="p25-lede" style={{ marginBottom: '1.25rem' }}>
+              Each cohort covers one module, not all five. Swipe to see them.
+            </p>
+            <div className="p25-skills-track">
+              {skills.map((s, i) => (
+                <div className="p25-skill-card" key={s.id}>
+                  <div className="p25-skill-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="p25-skill-title">{s.title}</div>
+                  <p className="p25-skill-desc">{s.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section style={{ marginTop: '2.5rem' }}>
           <h2 className="p25-h2">Is your parish next?</h2>
