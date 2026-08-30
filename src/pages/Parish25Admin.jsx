@@ -43,8 +43,35 @@ export default function Parish25Admin() {
         </div>
       </div>
       <main className="p25-wrap">
-        {session ? <EnquiryDashboard /> : <LoginForm />}
+        {session ? <AdminHome /> : <LoginForm />}
       </main>
+    </div>
+  );
+}
+
+function AdminHome() {
+  const [section, setSection] = useState('enquiries');
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        {['enquiries', 'skills'].map((s) => (
+          <button
+            key={s}
+            onClick={() => setSection(s)}
+            style={{
+              fontFamily: 'var(--body)', fontSize: '0.9rem', fontWeight: 500, padding: '0.6rem 1.1rem',
+              borderRadius: '100px', cursor: 'pointer',
+              border: section === s ? '1px solid var(--ink)' : '1px solid var(--line)',
+              background: section === s ? 'var(--ink)' : 'transparent',
+              color: section === s ? '#fff' : 'var(--ink-soft)',
+            }}
+          >
+            {s === 'enquiries' ? 'Enquiries' : 'Skills'}
+          </button>
+        ))}
+      </div>
+      {section === 'enquiries' ? <EnquiryDashboard /> : <SkillsManager />}
     </div>
   );
 }
@@ -274,6 +301,118 @@ function EnquiryDashboard() {
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const emptySkillDraft = { title: '', description: '', sort_order: 0, active: true };
+
+function SkillsManager() {
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [draft, setDraft] = useState(emptySkillDraft);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadSkills();
+  }, []);
+
+  async function loadSkills() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('parish25_skills')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    if (error) console.error('Failed to load skills:', error);
+    setSkills(data ?? []);
+    setLoading(false);
+  }
+
+  function handleDraftChange(e) {
+    const { name, value, type, checked } = e.target;
+    setDraft((d) => ({ ...d, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  async function handleAddSkill(e) {
+    e.preventDefault();
+    setSaving(true);
+    const payload = { ...draft, sort_order: Number(draft.sort_order) || 0 };
+    const { data, error } = await supabase.from('parish25_skills').insert(payload).select().single();
+    if (error) {
+      console.error('Failed to add skill:', error);
+    } else {
+      setSkills((s) => [...s, data].sort((a, b) => a.sort_order - b.sort_order));
+      setDraft(emptySkillDraft);
+      setShowAddForm(false);
+    }
+    setSaving(false);
+  }
+
+  async function updateSkill(id, patch) {
+    const { error } = await supabase.from('parish25_skills').update(patch).eq('id', id);
+    if (error) {
+      console.error('Failed to update skill:', error);
+    } else {
+      setSkills((s) => s.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+    }
+  }
+
+  return (
+    <section>
+      <div className="p25-chain-header">
+        <h1 className="p25-h2" style={{ margin: 0 }}>Skills</h1>
+        <span className="p25-chain-count">{skills.filter((s) => s.active).length} live on site</span>
+      </div>
+
+      <div style={{ marginBottom: '1.25rem' }}>
+        <button
+          className="p25-btn"
+          style={{ width: 'auto', background: showAddForm ? 'var(--bg-2)' : 'var(--accent)', color: showAddForm ? 'var(--ink)' : '#fff' }}
+          onClick={() => setShowAddForm((v) => !v)}
+        >
+          {showAddForm ? 'Cancel' : '+ Add skill'}
+        </button>
+      </div>
+
+      {showAddForm && (
+        <div className="p25-card" style={{ marginBottom: '1.5rem' }}>
+          <form onSubmit={handleAddSkill}>
+            <div className="p25-field">
+              <label htmlFor="title">Title</label>
+              <input id="title" name="title" required value={draft.title} onChange={handleDraftChange} />
+            </div>
+            <div className="p25-field">
+              <label htmlFor="description">Description</label>
+              <textarea id="description" name="description" required value={draft.description} onChange={handleDraftChange} />
+            </div>
+            <div className="p25-field">
+              <label htmlFor="sort_order">Order (lower shows first)</label>
+              <input id="sort_order" name="sort_order" type="number" value={draft.sort_order} onChange={handleDraftChange} />
+            </div>
+            <button type="submit" className="p25-btn" disabled={saving}>
+              {saving ? 'Saving…' : 'Save skill'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {loading && <p className="p25-lede">Loading…</p>}
+
+      <div className="p25-card" style={{ padding: '0.5rem 1.5rem' }}>
+        {skills.map((s) => (
+          <div key={s.id} className="p25-admin-row">
+            <div style={{ opacity: s.active ? 1 : 0.5 }}>
+              <div className="p25-name">{s.sort_order}. {s.title}</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--ink-soft)', maxWidth: '46ch' }}>{s.description}</div>
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
+              <input type="checkbox" checked={s.active} onChange={(e) => updateSkill(s.id, { active: e.target.checked })} />
+              Live
+            </label>
           </div>
         ))}
       </div>
