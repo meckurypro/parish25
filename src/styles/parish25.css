@@ -64,6 +64,10 @@
 @media (min-width: 480px) { .p25-btn { width: auto; } }
 .p25-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.p25 a.p25-btn {
+  color: #fff;
+}
+
 .p25-field { margin-bottom: 1.1rem; }
 .p25-field label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; }
 .p25-field input, .p25-field textarea, .p25-field select { width: 100%; font-family: var(--body); font-size: 1rem; padding: 0.75rem 0.9rem; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-0); color: var(--ink); }
