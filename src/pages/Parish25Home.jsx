@@ -75,9 +75,9 @@ export default function Parish25Home() {
 
         <section className="p25-chain-section">
           <div className="p25-chain-header">
-            <h2 className="p25-h2" style={{ margin: 0 }}>The chain</h2>
+            <h2 className="p25-h2" style={{ margin: 0 }}>Parishes Visited</h2>
             <span className="p25-chain-count">
-              <b>{loading ? '…' : doneCount}</b> of {TOTAL_SLOTS} complete
+              <b>{loading ? '…' : doneCount}</b> of {TOTAL_SLOTS}
             </span>
           </div>
 
