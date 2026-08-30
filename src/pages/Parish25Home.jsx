@@ -2,7 +2,7 @@
 // Public landing page for the Parish 25 Initiative.
 // Route this at e.g. /parish25 in your router.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import '../styles/parish25.css';
 
@@ -11,6 +11,9 @@ const TOTAL_SLOTS = 25;
 export default function Parish25Home() {
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [skills, setSkills] = useState([]);
+  const trackRef = useRef(null);
+  const pausedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -35,9 +38,47 @@ export default function Parish25Home() {
       setLoading(false);
     }
 
+    async function loadSkills() {
+      const { data, error } = await supabase
+        .from('parish25_skills')
+        .select('id, title, description')
+        .eq('active', true)
+        .order('sort_order', { ascending: true });
+      if (!active) return;
+      if (error) console.error('Failed to load skills:', error);
+      setSkills(data ?? []);
+    }
+
     loadCompleted();
+    loadSkills();
     return () => { active = false; };
   }, []);
+
+  // Gentle continuous auto-scroll on the skills strip — pauses while the
+  // user is actively touching/dragging it, resumes shortly after they let go.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || skills.length === 0) return;
+
+    const id = setInterval(() => {
+      if (pausedRef.current) return;
+      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+      if (atEnd) {
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        track.scrollBy({ left: 1, behavior: 'auto' });
+      }
+    }, 30);
+
+    return () => clearInterval(id);
+  }, [skills]);
+
+  function pause() {
+    pausedRef.current = true;
+  }
+  function resumeSoon() {
+    setTimeout(() => { pausedRef.current = false; }, 2500);
+  }
 
   const doneCount = completed.length;
   const beads = Array.from({ length: TOTAL_SLOTS }, (_, i) => i < doneCount);
@@ -60,6 +101,28 @@ export default function Parish25Home() {
           </p>
         </section>
 
+        {skills.length > 0 && (
+          <section style={{ margin: '2.5rem 0' }}>
+            <h2 className="p25-h2">What you'll learn</h2>
+            <div
+              className="p25-skills-track"
+              ref={trackRef}
+              onTouchStart={pause}
+              onTouchEnd={resumeSoon}
+              onMouseDown={pause}
+              onMouseUp={resumeSoon}
+            >
+              {skills.map((s, i) => (
+                <div className="p25-skill-card" key={s.id}>
+                  <div className="p25-skill-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="p25-skill-title">{s.title}</div>
+                  <p className="p25-skill-desc">{s.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="p25-chain-section">
           <div className="p25-chain-header">
             <h2 className="p25-h2" style={{ margin: 0 }}>The chain</h2>
@@ -75,7 +138,7 @@ export default function Parish25Home() {
               ))}
             </div>
             <p className="p25-chain-note">
-              Parishes appear here after workshop completion.
+              Earned, not pledged.
             </p>
           </div>
         </section>
