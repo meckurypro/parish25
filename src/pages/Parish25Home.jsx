@@ -1,5 +1,5 @@
 // src/pages/Parish25Home.jsx
-// Landing page for the Parish 25 Initiative.
+// Public landing page for the Parish 25 Initiative.
 // Route this at e.g. /parish25 in your router.
 
 import { useEffect, useState } from 'react';
@@ -112,7 +112,7 @@ export default function Parish25Home() {
           <section style={{ margin: '2.5rem 0' }}>
             <h2 className="p25-h2">Modules</h2>
             <p className="p25-lede" style={{ marginBottom: '1.25rem' }}>
-              Each cohort covers one module, not all. Swipe to see them.
+              Each cohort covers one module, not all {skills.length}. Swipe to see them.
             </p>
             <div className="p25-skills-track">
               {skills.map((s, i) => (
