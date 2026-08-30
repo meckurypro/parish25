@@ -3,7 +3,7 @@
 // (anon INSERT policy required — no separate webhook/n8n needed).
 // Route this at e.g. /parish25/request in your router.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import '../styles/parish25.css';
 
@@ -14,11 +14,25 @@ const initialForm = {
   phone: '',
   email: '',
   message: '',
+  skill_interest: '',
 };
 
 export default function Parish25Request() {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
+  const [skills, setSkills] = useState([]);
+
+  useEffect(() => {
+    supabase
+      .from('parish25_skills')
+      .select('id, title')
+      .eq('active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) console.error('Failed to load skills:', error);
+        setSkills(data ?? []);
+      });
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -109,6 +123,16 @@ export default function Parish25Request() {
               <label htmlFor="email">Email (optional)</label>
               <input id="email" name="email" type="email"
                      value={form.email} onChange={handleChange} autoComplete="email" />
+            </div>
+
+            <div className="p25-field">
+              <label htmlFor="skill_interest">What are you most interested in?</label>
+              <select id="skill_interest" name="skill_interest" value={form.skill_interest} onChange={handleChange}>
+                <option value="">Select an area (optional)</option>
+                {skills.map((s) => (
+                  <option key={s.id} value={s.title}>{s.title}</option>
+                ))}
+              </select>
             </div>
 
             <div className="p25-field">
