@@ -75,7 +75,7 @@ export default function Parish25Home() {
 
         <section className="p25-chain-section">
           <div className="p25-chain-header">
-            <h2 className="p25-h2" style={{ margin: 0 }}>Parishes Visited</h2>
+            <h2 className="p25-h2" style={{ margin: 0 }}>Parish25 Progress</h2>
             <span className="p25-chain-count">
               <b>{loading ? '…' : doneCount}</b> of {TOTAL_SLOTS}
             </span>
@@ -94,7 +94,7 @@ export default function Parish25Home() {
         </section>
 
         <section>
-          <h2 className="p25-h2">Completed</h2>
+          <h2 className="p25-h2">Parishes Visited</h2>
           <ul className="p25-list">
             {!loading && completed.length === 0 && (
               <li><span className="p25-name" style={{ color: 'var(--ink-soft)' }}>Nothing here yet — check back soon.</span></li>
@@ -112,7 +112,7 @@ export default function Parish25Home() {
           <section style={{ margin: '2.5rem 0' }}>
             <h2 className="p25-h2">Modules</h2>
             <p className="p25-lede" style={{ marginBottom: '1.25rem' }}>
-              Each cohort covers one module, not all five. Swipe to see them.
+              Each cohort covers one module, not all. Swipe to see them.
             </p>
             <div className="p25-skills-track">
               {skills.map((s, i) => (
