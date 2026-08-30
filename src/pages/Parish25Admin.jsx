@@ -356,9 +356,19 @@ function SkillsManager() {
     const { error } = await supabase.from('parish25_skills').update(patch).eq('id', id);
     if (error) {
       console.error('Failed to update skill:', error);
-    } else {
-      setSkills((s) => s.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+      return false;
     }
+    setSkills((s) => s.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+    return true;
+  }
+
+  async function deleteSkill(id) {
+    const { error } = await supabase.from('parish25_skills').delete().eq('id', id);
+    if (error) {
+      console.error('Failed to delete skill:', error);
+      return;
+    }
+    setSkills((s) => s.filter((row) => row.id !== id));
   }
 
   return (
@@ -404,18 +414,107 @@ function SkillsManager() {
 
       <div className="p25-card" style={{ padding: '0.5rem 1.5rem' }}>
         {skills.map((s) => (
-          <div key={s.id} className="p25-admin-row">
-            <div style={{ opacity: s.active ? 1 : 0.5 }}>
-              <div className="p25-name">{s.sort_order}. {s.title}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--ink-soft)', maxWidth: '46ch' }}>{s.description}</div>
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
-              <input type="checkbox" checked={s.active} onChange={(e) => updateSkill(s.id, { active: e.target.checked })} />
-              Live
-            </label>
-          </div>
+          <SkillRow key={s.id} skill={s} onSave={updateSkill} onDelete={deleteSkill} />
         ))}
       </div>
     </section>
+  );
+}
+
+function SkillRow({ skill, onSave, onDelete }) {
+  const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [form, setForm] = useState({ title: skill.title, description: skill.description, sort_order: skill.sort_order });
+  const [saving, setSaving] = useState(false);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    const ok = await onSave(skill.id, { ...form, sort_order: Number(form.sort_order) || 0 });
+    setSaving(false);
+    if (ok) setEditing(false);
+  }
+
+  function handleCancel() {
+    setForm({ title: skill.title, description: skill.description, sort_order: skill.sort_order });
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <div className="p25-admin-row" style={{ display: 'block' }}>
+        <div className="p25-field">
+          <label htmlFor={`title-${skill.id}`}>Title</label>
+          <input id={`title-${skill.id}`} name="title" value={form.title} onChange={handleChange} />
+        </div>
+        <div className="p25-field">
+          <label htmlFor={`description-${skill.id}`}>Description</label>
+          <textarea id={`description-${skill.id}`} name="description" value={form.description} onChange={handleChange} />
+        </div>
+        <div className="p25-field">
+          <label htmlFor={`sort_order-${skill.id}`}>Order</label>
+          <input id={`sort_order-${skill.id}`} name="sort_order" type="number" value={form.sort_order} onChange={handleChange} />
+        </div>
+        <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <button className="p25-btn" style={{ width: 'auto' }} onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            style={{ background: 'none', border: '1px solid var(--line)', borderRadius: '100px', padding: '0.85rem 1.5rem', cursor: 'pointer', fontFamily: 'var(--body)' }}
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p25-admin-row">
+      <div style={{ opacity: skill.active ? 1 : 0.5 }}>
+        <div className="p25-name">{skill.sort_order}. {skill.title}</div>
+        <div style={{ fontSize: '0.85rem', color: 'var(--ink-soft)', maxWidth: '46ch' }}>{skill.description}</div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
+          <input type="checkbox" checked={skill.active} onChange={(e) => onSave(skill.id, { active: e.target.checked })} />
+          Live
+        </label>
+        <button
+          style={{ background: 'none', border: 'none', color: 'var(--ink-soft)', cursor: 'pointer', fontFamily: 'var(--body)', fontSize: '0.85rem', textDecoration: 'underline' }}
+          onClick={() => setEditing(true)}
+        >
+          Edit
+        </button>
+        {confirmingDelete ? (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <button
+              style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontFamily: 'var(--body)', fontSize: '0.85rem', fontWeight: 500 }}
+              onClick={() => onDelete(skill.id)}
+            >
+              Confirm delete
+            </button>
+            <button
+              style={{ background: 'none', border: 'none', color: 'var(--ink-soft)', cursor: 'pointer', fontFamily: 'var(--body)', fontSize: '0.85rem' }}
+              onClick={() => setConfirmingDelete(false)}
+            >
+              Cancel
+            </button>
+          </span>
+        ) : (
+          <button
+            style={{ background: 'none', border: 'none', color: 'var(--ink-soft)', cursor: 'pointer', fontFamily: 'var(--body)', fontSize: '0.85rem', textDecoration: 'underline' }}
+            onClick={() => setConfirmingDelete(true)}
+          >
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
