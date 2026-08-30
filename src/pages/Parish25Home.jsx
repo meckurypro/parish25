@@ -106,7 +106,11 @@ export default function Parish25Home() {
 
         <footer className="p25-footer">
           <span>Parish 25 Initiative — a PromptIQ movement</span>
-          <a href="https://academy.promptiq.com.ng" target="_blank" rel="noopener noreferrer">More on IQ Academy →</a>
+          <span style={{ display: 'flex', gap: '1rem' }}>
+            <a href="https://academy.promptiq.com.ng" target="_blank" rel="noopener noreferrer">More on IQ Academy →</a>
+            {/* Deliberately unstyled/low-emphasis — internal link, not meant to invite clicks */}
+            <a href="/admin" style={{ color: 'var(--ink-soft)', opacity: 0.6, textDecoration: 'none' }}>Staff</a>
+          </span>
         </footer>
       </main>
     </div>
