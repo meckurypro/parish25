@@ -1,5 +1,5 @@
 // src/pages/Parish25Request.jsx
-// Request-a-visit form. Inserts directly into `parish_enquiries` via Supabase
+// Request-visit form. Inserts directly into `parish_enquiries` via Supabase
 // (anon INSERT policy required — no separate webhook/n8n needed).
 // Route this at e.g. /parish25/request in your router.
 
