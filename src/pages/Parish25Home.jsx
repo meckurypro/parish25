@@ -1,5 +1,5 @@
 // src/pages/Parish25Home.jsx
-// Public landing page for the Parish 25 Initiative.
+// Landing page for the Parish 25 Initiative.
 // Route this at e.g. /parish25 in your router.
 
 import { useEffect, useState } from 'react';
