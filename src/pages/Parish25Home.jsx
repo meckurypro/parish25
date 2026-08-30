@@ -75,8 +75,7 @@ export default function Parish25Home() {
               ))}
             </div>
             <p className="p25-chain-note">
-              Parishes appear here once their workshop series is fully complete —
-              not when a visit is first proposed.
+              Parishes appear here after workshop completion.
             </p>
           </div>
         </section>
