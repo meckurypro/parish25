@@ -27,7 +27,6 @@
 .p25 img, .p25 svg { display: block; max-width: 100%; }
 
 .p25-wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
-@media (min-width: 720px) { .p25-wrap { padding: 3rem 2rem 5rem; } }
 
 .p25-nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.25rem 0; max-width: 640px; margin: 0 auto; }
 .p25-wordmark { font-family: var(--display); font-weight: 600; font-size: 1.05rem; text-decoration: none; }
@@ -52,20 +51,19 @@
 .p25-chain-note { margin-top: 1rem; font-size: 0.85rem; color: var(--ink-soft); }
 
 .p25-list { list-style: none; margin: 1.25rem 0 0; padding: 0; }
-.p25-list li { display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 0; border-top: 1px solid var(--line); font-size: 0.98rem; }
+.p25-list li { padding: 0.85rem 0; border-top: 1px solid var(--line); font-size: 0.98rem; }
 .p25-list li:first-child { border-top: none; }
-.p25-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done); flex: 0 0 auto; }
+.p25-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done); flex: 0 0 auto; display: inline-block; }
 .p25-dot.warn { background: var(--warn); }
 .p25-name { font-weight: 500; }
 
 .p25-h2 { font-family: var(--display); font-weight: 500; font-size: 1.4rem; margin: 0 0 0.75rem; }
 
 .p25-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--accent); color: #fff; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.85rem 1.5rem; border-radius: 100px; border: none; cursor: pointer; width: 100%; }
-@media (min-width: 480px) { .p25-btn { width: auto; } }
+
 .p25-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .p25 a.p25-btn {
-  color: #fff;
 }
 
 .p25-field { margin-bottom: 1.1rem; }
@@ -76,7 +74,7 @@
 .p25-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--ink-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
 .p25-footer a { text-decoration: underline; }
 
-/* -- admin-only additions -- */
+/* -- admin -- */
 .p25-admin-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-top: 1px solid var(--line); }
 .p25-admin-row:first-child { border-top: none; }
 .p25-status-badge { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem 0.6rem; border-radius: 100px; }
@@ -132,4 +130,54 @@
   color: var(--ink-soft);
   line-height: 1.45;
   margin: 0;
+}
+
+/* -- parish media strip (Parishes Visited — linked IQ Academy media) -- */
+.p25-parish-media-track {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  margin-top: 0.75rem;
+  padding-bottom: 0.25rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.p25-parish-media-track::-webkit-scrollbar { display: none; }
+
+.p25-media-item {
+  position: relative;
+  flex: 0 0 62%;
+  max-width: 220px;
+  scroll-snap-align: start;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  aspect-ratio: 4/3;
+  background: var(--bg-1);
+}
+
+.p25-play-btn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(33, 31, 29, 0.15);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.p25-play-btn-inner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(33, 31, 29, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
