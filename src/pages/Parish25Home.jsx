@@ -1,12 +1,80 @@
 // src/pages/Parish25Home.jsx
 // Public landing page for the Parish 25 Initiative.
 // Route this at e.g. /parish25 in your router.
+//
+// CHANGED: "Parishes Visited" now pulls in the IQ Academy media
+// (photos/videos) linked to each executed parish via
+// parish_enquiries.academy_training_id -> academy_trainings.id
+// -> academy_media.training_id. The admin links a parish to a training
+// in Parish25Admin; nothing is re-uploaded here, we just read what
+// IQ Academy already has.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import '../styles/parish25.css';
 
 const TOTAL_SLOTS = 25;
+
+// ── One media item (image or video) inside a parish's strip ──────
+// Same play/pause pattern IQ Academy's GalleryPage already uses:
+// videos sit paused on their poster frame until tapped.
+function ParishMediaItem({ media }) {
+  const videoRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  function handlePlay() {
+    setPlaying(true);
+    requestAnimationFrame(() => {
+      videoRef.current?.play().catch(() => {});
+    });
+  }
+
+  return (
+    <div className="p25-media-item">
+      {media.media_type === 'video' ? (
+        <>
+          <video
+            ref={videoRef}
+            src={media.url}
+            poster={media.poster_url || undefined}
+            preload="metadata"
+            playsInline
+            controls={playing}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          {!playing && (
+            <button className="p25-play-btn" onClick={handlePlay} aria-label="Play video">
+              <span className="p25-play-btn-inner">
+                <svg width="16" height="18" viewBox="0 0 20 22" fill="none">
+                  <path d="M2 2.5C2 1.06 3.57 0.17 4.82 0.9L18.4 8.9C19.62 9.62 19.62 11.38 18.4 12.1L4.82 20.1C3.57 20.83 2 19.94 2 18.5V2.5Z" fill="white" />
+                </svg>
+              </span>
+            </button>
+          )}
+        </>
+      ) : (
+        <img
+          src={media.url}
+          alt={media.caption || ''}
+          loading="lazy"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Horizontal swipeable strip of a parish's linked media ────────
+function ParishMediaStrip({ media }) {
+  if (!media || media.length === 0) return null;
+  return (
+    <div className="p25-parish-media-track">
+      {media.map((m) => (
+        <ParishMediaItem key={m.id} media={m} />
+      ))}
+    </div>
+  );
+}
 
 export default function Parish25Home() {
   const [completed, setCompleted] = useState([]);
@@ -20,9 +88,26 @@ export default function Parish25Home() {
       // Public read: only rows with status = 'executed' are ever fetched here.
       // RLS should restrict SELECT on parish_enquiries to this filtered view
       // (or expose it via a public `parish25_completed` view instead of the raw table).
+      //
+      // The embed follows academy_training_id -> academy_trainings, then
+      // -> academy_media. Both FK names are given explicitly because
+      // academy_trainings has more than one relationship to academy_media
+      // (training_id AND thumbnail_media_id), so PostgREST needs to be told
+      // which path to walk — same reason IQ Academy's GalleryPage does it.
       const { data, error } = await supabase
         .from('parish_enquiries')
-        .select('parish_name, completed_at')
+        .select(`
+          parish_name,
+          completed_at,
+          academy_training_id,
+          academy_trainings!parish_enquiries_academy_training_id_fkey (
+            id,
+            title,
+            academy_media!academy_media_training_id_fkey (
+              id, media_type, url, poster_url, caption, sort_order
+            )
+          )
+        `)
         .eq('status', 'executed')
         .order('completed_at', { ascending: true });
 
@@ -31,7 +116,15 @@ export default function Parish25Home() {
         console.error('Failed to load completed parishes:', error);
         setCompleted([]);
       } else {
-        setCompleted(data ?? []);
+        // Sort each parish's media by sort_order client-side (simpler than
+        // a nested foreignTable order across a two-level embed).
+        const withSortedMedia = (data ?? []).map((p) => ({
+          ...p,
+          media: [...(p.academy_trainings?.academy_media ?? [])].sort(
+            (a, b) => a.sort_order - b.sort_order
+          ),
+        }));
+        setCompleted(withSortedMedia);
       }
       setLoading(false);
     }
@@ -95,14 +188,26 @@ export default function Parish25Home() {
 
         <section>
           <h2 className="p25-h2">Parishes Visited</h2>
+          {!loading && completed.length === 0 && (
+            <p className="p25-lede" style={{ marginBottom: 0 }}>Nothing here yet — check back soon.</p>
+          )}
           <ul className="p25-list">
-            {!loading && completed.length === 0 && (
-              <li><span className="p25-name" style={{ color: 'var(--ink-soft)' }}>Nothing here yet — check back soon.</span></li>
-            )}
             {completed.map((p) => (
-              <li key={p.parish_name}>
-                <span className="p25-dot" />
-                <span className="p25-name">{p.parish_name}</span>
+              <li key={p.parish_name} style={{ display: 'block' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <span className="p25-dot" />
+                  <span className="p25-name">{p.parish_name}</span>
+                </div>
+                {p.media.length > 0 && (
+                  <>
+                    <ParishMediaStrip media={p.media} />
+                    {p.media.length > 1 && (
+                      <p style={{ fontSize: '0.75rem', color: 'var(--ink-soft)', margin: '0.4rem 0 0' }}>
+                        Swipe to see more · {p.media.length} files
+                      </p>
+                    )}
+                  </>
+                )}
               </li>
             ))}
           </ul>
