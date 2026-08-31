@@ -3,6 +3,11 @@
 // Admin accounts are created manually in the Supabase dashboard (Auth > Users),
 // same pattern as the existing Meckury AI / IQ Ads admin pages.
 // Route this at /admin. Linked subtly from the homepage footer as "Staff".
+//
+// CHANGED: EnquiryDashboard now loads academy_trainings (read-only, no
+// media upload here — that still happens on IQ Academy's own admin) so
+// staff can link a parish's academy_training_id to whichever training's
+// photos/videos should represent that parish's workshop on the homepage.
 
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
@@ -117,11 +122,13 @@ function LoginForm() {
 }
 
 const emptyDraft = {
-  parish_name: '', location: '', contact_name: '', phone: '', email: '', message: '', status: 'enquiry',
+  parish_name: '', location: '', contact_name: '', phone: '', email: '', message: '',
+  status: 'enquiry', academy_training_id: '',
 };
 
 function EnquiryDashboard() {
   const [rows, setRows] = useState([]);
+  const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -132,6 +139,7 @@ function EnquiryDashboard() {
 
   useEffect(() => {
     loadRows();
+    loadTrainings();
   }, []);
 
   async function loadRows() {
@@ -143,6 +151,18 @@ function EnquiryDashboard() {
     if (error) console.error('Failed to load enquiries:', error);
     setRows(data ?? []);
     setLoading(false);
+  }
+
+  // Read-only list of IQ Academy trainings, used to populate the "link
+  // media" picker below. Media itself is still uploaded on IQ Academy's
+  // own admin — this page only connects a parish to an existing training.
+  async function loadTrainings() {
+    const { data, error } = await supabase
+      .from('academy_trainings')
+      .select('id, title, training_date, status')
+      .order('training_date', { ascending: false });
+    if (error) console.error('Failed to load trainings:', error);
+    setTrainings(data ?? []);
   }
 
   async function updateStatus(id, status) {
@@ -159,6 +179,18 @@ function EnquiryDashboard() {
     setSavingId(null);
   }
 
+  async function updateTrainingLink(id, academyTrainingId) {
+    setSavingId(id);
+    const patch = { academy_training_id: academyTrainingId || null };
+    const { error } = await supabase.from('parish_enquiries').update(patch).eq('id', id);
+    if (error) {
+      console.error('Failed to update training link:', error);
+    } else {
+      setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    }
+    setSavingId(null);
+  }
+
   function handleDraftChange(e) {
     const { name, value } = e.target;
     setDraft((d) => ({ ...d, [name]: value }));
@@ -169,7 +201,7 @@ function EnquiryDashboard() {
     setAdding(true);
     setAddError(null);
 
-    const payload = { ...draft };
+    const payload = { ...draft, academy_training_id: draft.academy_training_id || null };
     if (payload.status === 'executed') payload.completed_at = new Date().toISOString();
 
     // Manual entries (parishes reached in person, not via the public form)
@@ -195,6 +227,13 @@ function EnquiryDashboard() {
   }, [rows]);
 
   const visibleRows = activeTab === 'all' ? rows : rows.filter((r) => r.status === activeTab);
+
+  function trainingLabel(t) {
+    const date = t.training_date
+      ? new Date(t.training_date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+      : 'no date';
+    return `${t.title} — ${date}`;
+  }
 
   return (
     <section>
@@ -266,6 +305,15 @@ function EnquiryDashboard() {
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
+            <div className="p25-field">
+              <label htmlFor="academy_training_id">Link IQ Academy media (optional)</label>
+              <select id="academy_training_id" name="academy_training_id" value={draft.academy_training_id} onChange={handleDraftChange}>
+                <option value="">— No media —</option>
+                {trainings.map((t) => (
+                  <option key={t.id} value={t.id}>{trainingLabel(t)}</option>
+                ))}
+              </select>
+            </div>
             {addError && <p style={{ color: 'var(--accent)', fontSize: '0.9rem', marginBottom: '1rem' }}>{addError}</p>}
             <button type="submit" className="p25-btn" disabled={adding}>
               {adding ? 'Saving…' : 'Save parish'}
@@ -282,7 +330,7 @@ function EnquiryDashboard() {
 
       <div className="p25-card" style={{ padding: '0.5rem 1.5rem' }}>
         {visibleRows.map((r) => (
-          <div key={r.id} className="p25-admin-row">
+          <div key={r.id} className="p25-admin-row" style={{ flexWrap: 'wrap' }}>
             <div>
               <div className="p25-name">{r.parish_name}</div>
               <div style={{ fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
@@ -290,7 +338,7 @@ function EnquiryDashboard() {
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--ink-soft)' }}>{r.location}</div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
               <span className={`p25-status-badge ${r.status}`}>{r.status}</span>
               <select
                 value={r.status}
@@ -299,6 +347,18 @@ function EnquiryDashboard() {
                 style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem', borderRadius: '8px', border: '1px solid var(--line)' }}
               >
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select
+                value={r.academy_training_id || ''}
+                disabled={savingId === r.id}
+                onChange={(e) => updateTrainingLink(r.id, e.target.value)}
+                title="Which IQ Academy training's photos/videos should show for this parish"
+                style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem', borderRadius: '8px', border: '1px solid var(--line)' }}
+              >
+                <option value="">No media linked</option>
+                {trainings.map((t) => (
+                  <option key={t.id} value={t.id}>{trainingLabel(t)}</option>
+                ))}
               </select>
             </div>
           </div>
