@@ -181,3 +181,52 @@
   align-items: center;
   justify-content: center;
 }
+
+/* -- reviews strip (public /reviews submissions, near footer) -- */
+.p25-reviews-track {
+  display: flex;
+  gap: 0.9rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.5rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.p25-reviews-track::-webkit-scrollbar { display: none; }
+
+.p25-review-card {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: 78%;
+  max-width: 300px;
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 1.25rem;
+}
+
+.p25-review-quote {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin: 0 0 0.85rem;
+}
+
+.p25-review-name { font-weight: 500; font-size: 0.9rem; }
+.p25-review-sub { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.15rem; }
+
+.p25-review-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 100px;
+  background: rgba(226, 87, 31, 0.1);
+  color: var(--accent);
+  margin-top: 0.75rem;
+}
