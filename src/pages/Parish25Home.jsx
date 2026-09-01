@@ -18,7 +18,7 @@ const TOTAL_SLOTS = 25;
 
 // Reviews are sorted alphabetically by the first word of their content
 // (not by name or date) — same rule IQ Academy's homepage uses, since
-// both read the same academy_reviews table.
+// both read the same academy_testimonials table.
 function firstWord(text) {
   return (text || '').trim().match(/^\S+/)?.[0]?.toLowerCase() || '';
 }
@@ -151,9 +151,12 @@ export default function Parish25Home() {
 
     async function loadReviews() {
       // training_id -> academy_trainings has only one relationship from
-      // academy_reviews, so no explicit FK name is needed for the embed.
+      // academy_testimonials, so no explicit FK name is needed for the
+      // embed. (This table also holds what used to be a separate
+      // academy_reviews table — merged in since both served the same
+      // purpose; see merge_reviews_into_testimonials.sql.)
       const { data, error } = await supabase
-        .from('academy_reviews')
+        .from('academy_testimonials')
         .select('id, name, occupation, location, content, is_private_mentorship, academy_trainings(title)')
         .eq('is_published', true);
       if (!active) return;
