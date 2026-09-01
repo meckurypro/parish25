@@ -11,9 +11,17 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import ReviewsStrip from '../components/ReviewsStrip';
 import '../styles/parish25.css';
 
 const TOTAL_SLOTS = 25;
+
+// Reviews are sorted alphabetically by the first word of their content
+// (not by name or date) — same rule IQ Academy's homepage uses, since
+// both read the same academy_reviews table.
+function firstWord(text) {
+  return (text || '').trim().match(/^\S+/)?.[0]?.toLowerCase() || '';
+}
 
 // ── One media item (image or video) inside a parish's strip ──────
 // Same play/pause pattern IQ Academy's GalleryPage already uses:
@@ -80,6 +88,7 @@ export default function Parish25Home() {
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(true);
   const [skills, setSkills] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -140,8 +149,25 @@ export default function Parish25Home() {
       setSkills(data ?? []);
     }
 
+    async function loadReviews() {
+      // training_id -> academy_trainings has only one relationship from
+      // academy_reviews, so no explicit FK name is needed for the embed.
+      const { data, error } = await supabase
+        .from('academy_reviews')
+        .select('id, name, occupation, location, content, is_private_mentorship, academy_trainings(title)')
+        .eq('is_published', true);
+      if (!active) return;
+      if (error) {
+        console.error('Failed to load reviews:', error);
+        return;
+      }
+      const sorted = [...(data ?? [])].sort((a, b) => firstWord(a.content).localeCompare(firstWord(b.content)));
+      setReviews(sorted);
+    }
+
     loadCompleted();
     loadSkills();
+    loadReviews();
     return () => { active = false; };
   }, []);
 
@@ -238,6 +264,8 @@ export default function Parish25Home() {
           </p>
           <a className="p25-btn" href="/request">Request a visit</a>
         </section>
+
+        <ReviewsStrip reviews={reviews} />
 
         <footer className="p25-footer">
           <span>Parish 25 Initiative — a PromptIQ movement</span>
