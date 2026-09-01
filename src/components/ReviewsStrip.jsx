@@ -1,8 +1,10 @@
 // src/components/ReviewsStrip.jsx
 // Swipeable strip of published reviews — Parish25's light-theme
 // counterpart to IQ Academy's ReviewsCarousel. Reads the same
-// academy_reviews table (shared Supabase project); Parish25Home.jsx
-// does the fetch/sort, this just renders what it's given.
+// academy_testimonials table (shared Supabase project, and the same
+// table IQ Academy's old separate "Testimonials" feature was merged
+// into); Parish25Home.jsx does the fetch/sort, this just renders what
+// it's given.
 
 export default function ReviewsStrip({ reviews }) {
   if (!reviews || reviews.length === 0) return null
